@@ -1,0 +1,57 @@
+\chapter{Evaluation}
+\label{evaluation}
+
+In this section, the results of the project will be evaluated against the initial aims and objectives set out in Section \ref{introduction}. The overall aim of the project was to enhance the functional safety of the ATyS device through the design and development of an FPGA-based system. This was to be done by following the standardised safety integrity level (SIL) framework. The extent to which this overarching aim was achieved is discussed below in Section \ref{evaluation-of-aims}. Using the SIL framework, the functional safety of the device will be discussed. A number of objectives were laid out in the introduction in order to achieve this aim. The extent to which these objectives were achieved is discussed below in Section \ref{evaluation-of-objectives} along with a suggestion of how they can be built upon in the future.
+
+
+\section{Evaluation of Project Aims}
+\label{evaluation-of-aims}
+The overarching aim for the project was to investigate the advantages of an FPGA-based ATyS processor solution with a focus on the functional safety. Safety certification is a process of verification that the system developed follows the relevant SIL guidelines. In this section, the evaluation of the achievement of this aim will relate to how closely these guidelines were followed throughout the development phases of the FPGA-based ATyS prototype. An implicit aim of the project was to replicate the safety-related behaviour of the existing microcontroller solution. 
+
+\subsection{Safety Integrity Level Evaluation}
+
+As described above, the SIL framework standardises the claim of functional safety of a device application and there are two sets of processes which need to be followed to achieve this\cite{IEC61508}. The first of which is related to the prevention of systematic errors through following the recommended processes. The second set of processes are concerned with the detection and correction of online errors. Each of these sets of processes must be followed in order to claim a safety integrity level. The success in achieving each of these is discussed in this section.
+
+%\subsection{Prevention of Systematic Errors}
+The recommended V-model development process was followed closely throughout the design of the FPGA-based system. The logical flow from safety requirements elicitation through derivation of system architecture and down to the module implementation was performed in this project and is described in the design section. The initial verification phases of the process were followed throughout this project. Each module was functionally verified against its requirements. System-level verification was conducted on the physical prototype built as part of the project. The overall validation phases of the V-model were also performed on the physical prototype rather than in an automated test-bench. This allowed the behaviour to be compared with the existing solution.
+
+The V-model was a powerful tool in driving the development in the project. As well as encouraging verification throughout development, the V-model process required the understanding of project requirements before proceeding with the design. This was especially important because of the nature of this project. The safety requirements, which were derived from the system requirements, had to be well understood in order to contain the scope of the prototype and focus on safety-related aspects of the design, rather than a straight functional migration from microcontroller to FPGA.
+
+
+
+%\subsection{Diagnostics}
+Diagnostic measures were planned as part of this project. As discussed above, redundancy architectures and on-line verification components can be added to FPGA designs without impairing the performance\cite{Dubey}. These diagnostics, which are required by the standards in order to detect and control errors, were not implemented as part of this project and form part of the identified further work (see Section \ref{evaluation-of-objectives} below).
+
+
+Overall, the foundations for claiming a SIL for this device application have been laid through the adoption of recommended processes. With the completion of a number of additional activities, such as gate-level and system-level verification and the addition of diagnostic components, a safety integrity level could be claimed\cite{IEC61508}.
+
+\subsection{Microcontroller Behaviour Execution Accuracy}
+
+As seen in the results section, the FPGA-based solution has replicated the behaviour of the existing microcontroller for both a successful and unsuccessful motor movement. The successful motor movement, which was identified as the safety-function of the device, produced a similar response to the microcontroller system. The FPGA system designed, developed and verified was able to perform the core behaviour. The additional current regulation, which allows the device to control the behaviour under stalled and blocked conditions, was also replicated in the FPGA solution. The FPGA regulation process produced a smoother response from the current and it reached the nominal value more quickly after regulation was triggered. This prototype, which uses FPGA technology, now represents a safer alternative, as described in Table \ref{safety-table}, with the same behaviour.
+
+
+\subsection{Adoption of Verification Methodologies}
+
+Although simulations were used, the main form of verification in this project was done by observing the textual output of the verification methodologies (see Figure \ref{uvvm_results} for an example). UVVM allowed for value checking in a simulation and provided instant feedback which could be immediately compared to the fulfilment of project requirements (see Table \ref{requirements-verification-table}). This automation of testing prevents time-consuming and error-prone manual checking of simulation results. This speeds up and enhances the verification process and allows for reproducible results. OSVVM was also adopted to ensure that the system was being fully verified by tracking the states of the system during the verification process. The verification-suite achieved 100\% state coverage for this project. This methodology provides key coverage metrics which are required by the SIL process.
+
+
+%The FPGA design could be substituted for an ASIC with minimal effort to allow for larger-scale production at a lower cost\cite{deCastro}.
+
+\section{Evaluation of Project Objectives}
+\label{evaluation-of-objectives}
+
+\input{Tables/EvaluationOfObjectives.tex}
+
+
+There were six project objectives outlined in the introduction of this report. The completion of these project objectives has been evaluated in Table \ref{evaluation-table}. This table displays the objective and an evaluation of the extent of their completion. A suggestion of how each objective could be built on in the future is also given in the table. 
+
+In the Evaluation column of Table \ref{evaluation-table}, the extent of completion for each of the objective is discussed. This column describes the final state of the prototype, including the size of the design. The design consisted of 2967 lines of VHDL code and the verification code consisted of 4034 lines of VHDL code. This design was made up from 21 entities. When synthesised, the design consisted of 35 design units. This is because a number of the units were used multiple times in the design. Additionally, the Evaluation column notes that the safety-function behaviour was accurately replicated in the FPGA solution.
+
+Further work, which could be applied to build on the project objectives, is presented in Table \ref{evaluation-table}. The table mentions adapting the project and the design to the safety-standards for when they include FPGA specific considerations. It is expected that future safety-standards will have specific mention of FPGA and considerations for their use in safety systems. Additional further work for the project includes the expansion of the requirements from the subset required to perform the safety function to the entire set of requirements for ATyS motor control. The remainder of the requirements could be built into the current design for a future iteration of the FPGA-based system. Diagnostics could be applied to this design to further enhance the functional safety of the device. Example diagnostics are discussed in Section \ref{diagnostic-section}, each of which could be applied to this FPGA design. As mentioned in the table, the design only uses 36\% of the logic of the FPGA. The additional space could be used for the application of diagnostics and redundancy architectures. The evaluation table also mentions the completion of gate-level and system-level simulations. Application of these techniques provides insight into accurate timing and system interactions respectively.
+
+
+
+\section{Evaluation Conclusion}
+Overall, the foundations for claiming a SIL for the ATyS device have been laid. The processes intended to prevent systematic errors were followed closely throughout the design and verification phases. Although each module was verified individually and directly against the project requirements, there are some verification activities (gate and system-level) which must be undertaken before a safety integrity level can be fully claimed.
+
+Each of the objectives of the project was successfully completed and suggestions for how each of them can be built upon in the future have been given. The safety function of the ATyS motor control processor was successfully replicated using an FPGA. The PWM regulation behaviour of the FPGA was faster to respond and produced a smoother current response than the microcontroller solution.

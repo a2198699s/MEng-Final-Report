@@ -1,0 +1,245 @@
+\chapter{Design and Implementation}
+\label{design}
+
+This section presents the design of the FPGA-based control board prototype. The design followed the top-down design stages of the V-model shown in Figure \ref{V-model}. This section follows the design flow by first discussing the requirements for the system and how they were identified. This includes the identification of the subset of requirements necessary to implement the safety function of the device. This is followed by a presentation of the architecture that was derived from these requirements. The design and implementation of the modules which form the architecture is then presented. The physical prototype, created as part of this project, is then discussed.
+
+\section{V-Model Design Process}
+
+%The V-model is an iterative methodology which promotes...
+
+The design stages outlined in the V-model follow a top-down methodology. The methodology starts with the definition of the system and safety requirements.
+From these requirements, an architecture is derived.
+The behaviour of this architecture must then be modelled. 
+Modules which form the architecture can then be designed.
+The final stage of design, following the V-model, is the synthesis, placement and routing of the design. This stage involves the application of constraints to the synthesis environment as well as the mapping of the design.
+Each of these activities are described in the following sections.
+
+
+%The major focus of the V-model is on the verification of the design on every level. In order to achieve this, the system must be designed for testability. For example, on a module level, modules should be well contained, simple and have well-defined functionality. The reuse of modules also reduces the verification effort. 
+
+
+\section{Prototype System Requirements}
+
+An ATyS specification document was created by Socomec as part of a previous iteration of the device. 
+% original ATyS requirements
+This existing specification of the microcontroller-based system represents a full set of the requirements for the ATyS motor control. The motor control process has a number of operating modes and possible conditions. This includes the option to change the load motor as well as the command interface. For example, the commands can come from a customer input or from the source detection board of the ATyS. 
+
+
+%\subsection{Prototype Scope and Safety Requirements}
+
+For this prototype, the requirements which are necessary for performing the motor control were identified and this became the specification for the prototype.
+Only safety features should be considered with respect to the functional safety of the device\cite{HayekSRAM}.
+% requirements specification process - move this process to the safety requirements section?
+The comprehensive microcontroller specification was used to derive the subset of requirements to be implemented as a prototype. The motor control process was identified as the safety function and so this was the central focus for the prototype design. It is the core behaviour of the device and performs the essential behaviour of changing the connection from one source to another. External PCB requirements are outside of the scope of this project. Only the motor control requirements that relate to the processor and its interfaces were considered for this design. The requirements for the prototype are outlined in Table \ref{requirements-table}.
+
+
+%\subsection{Motor Control Process}
+
+The overall process of motor control involves moving from the current position to a desired position and stopping when the position is reached. Several stages, which need to be performed in order to complete this process, are outlined in the existing specification. 
+%The process begins with the driving of the required Thyristor and IGBT opposite pair (see Figure \ref{motor_control_circuit}). After this, a minimum PWM value is provided to the IGBTs. This value is increased until it reaches the maximum value and then the PWM duty-cycle is regulated based on the motor current. If the position is reached within five seconds, the motor is stopped. However; if the desired position is not reached within five seconds, the cycle is repeated and if still not successful after a further five seconds, the device is put into an error state and a relay is driven.
+%\subsection{Requirements for Performing Motor Control}
+% the requirements of this project 
+The external interfacing requirements of the motor control process can be broken down into three sections. The first of which is the command input. This uses a simple command which is input to the device by activating a number of pins. 
+The second requirement is the constant detection of the position. This is done using a series of pushbuttons, the state of which determine the physical position of the motor. 
+The final required interface of the motor control safety function is the control of the motor.  
+There are also internal requirements for the processing of these inputs and outputs. 
+PWM regulation allows for accurate motor control. The regulation scheme is to use the motor current value to adjust the PWM supply to the motor. PWM regulation also dependant on the supply voltage. 
+
+
+
+\input{Tables/Requirements.tex}
+
+%The PWM Regulation requirements, marked as PWM in Table \ref{requirements-table}, were only required for error cases. The regulation process would not need to run under normal conditions where
+
+\section{System Architecture}
+
+As dictated by the V-model process, the system architecture was derived from the system requirements. Similar FPGA implementations were analysed in order to identify common functional units used in FPGA motor control systems. Several architectures which have been designed in order to perform motor driving were analysed and common functional units include ADCs, position measurement, current regulation and PWM modules\cite{Jeppesen, MonmassonFPGABasedControllers, Dubey, Idkhajine, Aime}. Each of these units translates to the interfacing and processing requirements of the ATyS. The architecture which was derived from the requirements for this system is shown in Figure \ref{sys_architecture}. The inputs and outputs were defined by the requirements for accepting commands, reading position, analogue value monitoring and providing motor control signals. With a defined set of interfaces, the processes required in order to fulfil the requirements had to be decided. The system must make a decision based on the command and position inputs as to what motor control is required. The Input Processing module was added to the architecture in order to achieve this. The system must be able to measure the supply voltage and motor current in order to adjust the control scheme based on the environment. An ADC module was incorporated to provide these values to the regulation scheme.
+In cases of a stalled or blocked motor, the system must control regulation on the current to prevent high currents. The PWM Regulation module takes the output from the Input Processing and the reading from the ADC in order to control the current. The PWM signal which is generated must be correctly routed to the motor control circuitry. The Motor Driving module was added to the architecture in order to achieve this. 
+
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.95\textwidth]{images/SystemArchitecture.pdf}
+%\caption{High-level system architecture diagram showing system processes}
+%\label{system_architecture}
+%\end{figure}
+
+\begin{figure}
+    \centering
+    \input{Diagrams/SystemArchitecture.tex}
+    \caption{High-level system architecture diagram showing system modules}
+    \label{sys_architecture}
+\end{figure}
+
+
+%\subsection{Module Behaviours and Interactions}
+
+The Input Processing module handles the command and position input. The module needs to analyse the values of each of the inputs and determine whether a movement is necessary. It should interpret the received commands and position to determine the direction of the movement if a movement is necessary. This module also controls the motor driving process which handles timings and stopping conditions.
+
+The ADC module performs need to perform two measurements in order to provide voltage and current information to the PWM Regulation module. The supply voltage must be measured when the motor is not being driven. This allows the regulation process to limit the maximum PWM based on the supply voltage to prevent high currents. During motor control, the ADC must measure the motor current so that the PWM Regulation process can update the duty-cycle based on the response of the motor.
+
+The PWM Regulation module calculates the required duty-cycle for motor driving. It does this by monitoring the motor current, calculated by the ADC, and adjusting the duty-cycle accordingly. The upper limit of the duty-cycles is determined by the supply voltage. This is to prevent higher voltages from over-accelerating the motor. The PWM module is also required for generating a PWM of the calculated duty-cycle value.
+
+The motor driving module takes the PWM output by the regulation unit and supplies it to the correct motor driving transistors. The driving is performed by two IGBT / Thyristor pairs. This module needs to ensure the correct pair is driven based on the required direction of movement. It also performs the Thyristor and IGBT startup by driving them full for a given time specified in the requirements. The braking phase, also performed by the motor driving module, involves fully driving both IGBTs to stop the rotation of the motor. 
+
+
+
+
+
+\section{Module Design and Implementation}
+
+After the modules and the architecture have been defined, the V-model recommends performing module design. This process involves breaking down the module requirements into sub-modules which can then be designed in accordance to the V-model. For each of the four modules defined in the system architecture, the inputs, outputs and processing requirements are discussed. The implementation of the design is also presented for each module.
+
+\subsection{Input Processing}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.89\textwidth]{images/Positions.pdf}
+\caption{Valid motor positions from original ATyS specification}
+\label{motor_positions}
+\end{figure}
+
+% position design
+The position of the motor has to be monitored continuously throughout the control process in order to determine whether the desired position has been reached. The position is read from a series of push-button switches. The valid motor positions can be seen in Figure \ref{motor_positions}. This diagram shows the three motor positions zero, one and two representing a connection between no sources, source one and source two respectively. The diagram also shows the readable intermediate positions. In total there are seven valid positions for the motor to be in. The position measurement needs to be filtered in order to debounce the signal, ensuring that only valid position changes are propagated through the system.
+
+% position implementation
+The existing acquisition method was used in this design to determine the position of the motor. There are four buttons read into the system, along with their inverse value to confirm the state of the button, in order to determine the position of the motor. The position acquisition process translates these into a commonly understood positional encoding. The code which performs this translation is shown in Appendix Item \ref{position-multiplexing-code}. This encoding scheme indicated the absolute and relative position (for example to the left of position zero). This allowed the required movement to be calculated more easily and requiring less logic. It also handles movement from intermediate positions. 
+
+% command design
+For this prototype, only the customer command interface is being considered. This means that commands are supplied by stimulating a voltage input. There are three possible commands: go to position zero, go to position one and go to position two. Each of these should be processed and the motor should move to the position indicated by the command input.
+% command implementation
+The command is encoded in a similar way to the position. The required movement is encoded as a position in order to perform a comparison and calculate the required movement. This also allows the desired position to be determined so that the system can stop the motor when the position is reached. 
+
+% debounce implementation
+A shared debouncing process was used for both the position acquisition and the command interpreting in order to prevent glitches in the reading of inputs. It uses a shift register and comparison in order to ensure the input value is consistent. This shift register is currently only three bits; however, this value can be expanded to allow for more sophisticated debouncing. In this application, it was found that three bits was sufficient to avoid misreadings.
+
+% launch system / move design and implementation
+The device must interpret from the current position and the command which has been supplied whether a movement is necessary. It uses the shared position encoding scheme of the command and the position reading to compare the value and determine a direction of movement unless they are the same then no movement is required. After determining the required position, it provides directional information to the modules which perform the movement. The code which performs this decision-making logic is shown in Appendix Item \ref{input-processing-code}. The position must then be continually monitored to detect when the motor movement has been reached. Once this module detects the position has been reached, it must signal this to the movement modules to halt the motion. Taken from the specification, this module will signal the motor to stop if the position has not been reached after five seconds. 
+
+\subsection{ADC}
+
+There are two values which have to be measured by the processor: the supply voltage and the motor current. These allow for the accurate control of the motor. The value of the supply voltage determines the maximum duty-cycle of the PWM which drives the motor. This is to prevent over-driving which could cause current spikes. This value does not need to be updated during the motor driving phase. The motor current is used to regulate the PWM value to allow for optimal control of the motor during the motor driving phase. 
+
+The ADC which has been adopted in this FPGA is a sigma-delta ADC implemented in VHDL. This ADC has been implemented by Lattice Semiconductor and the structure of it is shown in Figure \ref{adc_schematic}. Each of the modules is implemented internally to the FPGA with the exception of the RC Network and the Comparator which are implemented on the peripheral of the FPGA. Since these measurements are never taken at the same time and in the interest of saving space on the FPGA, these two values are measured using the same ADC. The value measurement of the Lattice ADC is multiplexed to allow each of the values to be measured. The implementation code which performs this input multiplexing is shown in Appendix Item \ref{adc-multiplexing-code}.
+
+\begin{figure}[h]
+\centering
+\input{Diagrams/ADCschematic.tex}
+\caption{Schematic of the ADC obtained from Lattice\cite{LatticeADC}}
+\label{adc_schematic}
+\end{figure}
+
+
+
+\subsection{PWM Regulation}
+% combine with motor drive?
+
+%\subsection{Motor Current Regulation}
+The regulation of PWM limits the motor current which prevents dangerous current spikes. The measured motor current should be controlled against a predefined reference\cite{Aime}. The duty-cycle of the applied PWM can be regulated in order to control the speed of the motor\cite{Sathyan}. Duty-cycle controlled motor drive simplifies the regulation of motor speed\cite{Sathyan}.
+From the specification, the PWM needs to be regulated using a simple proportional control based on the motor current. Linear regulation of PWM is a simple and efficient control system\cite{Sathyan}. 
+
+Since the motor is being driven by a PWM signal, the current spikes up when the PWM is high and it drops when the PWM is low. In order to filter out the effect of this and get an average reading, the current should be measured in the middle of the PWM on-time. This allows the value to be averaged and provides a consistent reading.
+FPGAs are able to synchronise the measurement of the current and the PWM duty-cycle in order to obtain a more accurate measurement\cite{MonmassonDesign, Gomes}. This current value is used to update the PWM value to allow for optimal control.
+
+
+The PWM regulation scheme was implemented using a first-order proportional control scheme shown in Figure \ref{motor_control_loop}. 
+This control scheme was chosen because it can easily be implemented in a VHDL design using a series of basic calculations and shifts. Techniques such as fixed point arithmetic can be used to implement more complex control systems. However, a first-order scheme was found to be efficient and sufficient for this application.
+In this control scheme, the current value measured by the ADC is compared against the nominal value of 1A. This error is then translated into an error in PWM duty-cycle by applying a gain. Then, if the regulation is enabled in the control phase, the PWM duty-cycle value is updated. The value is truncated to ensure that it stays between the valid boundary set by the minimum and maximum values. The code which implements this PWM regulation process is shown in Appendix Item \ref{pwm-regulation-code}. The calculated value is provided to the PWM generator which translates this value into a PWM signal with a duty-cycle specified by the regulation scheme. The PWM Generator module triggers the current measurement at the midpoint of the duty-cycle in order to smooth the current measurement, as mentioned above. When triggered, the ADC value is taken in and used in the comparison. The value updates at 1kHz, once for every PWM cycle.
+
+
+\begin{figure}
+    \centering
+    \input{Diagrams/RegulationControl.tex}
+    \caption{PWM regulation process control loop}
+    \label{motor_control_loop}
+\end{figure}
+
+This control scheme was used to map to the response from the microcontroller-based regulation scheme. The output of the regulation scheme was analysed and modelled. The microcontroller output that was analysed and modelled is shown in Section \ref{regulation-results}. It was found to be a simple proportional controller. The simple control response was modified to include processes outlined in the requirements. For example, the current is acquired half-way through the on-time using a trigger from the PWM duty-cycle. Truncation was performed on the calculated value to ensure that it stayed between the defined minimum and the calculated maximum.
+
+\subsection{Motor Driving}
+
+The motor is driven using an H-bridge scheme consisting of two IGBT and Thyristor pairs. This circuit can be seen in Figure \ref{motor_control_circuit}. The motor drive module has to multiplex the PWM and control signals generated by the regulation phase to drive the correct IGBTs and Thyristors. The driving sequence is being modelled on the current set of requirements. It contains several discrete stages in order to drive the Thyristors and IGBTs to move the motor to the required position.
+
+\begin{figure}
+\centering
+\input{Diagrams/MotorDiagram.tex}
+\caption{Motor driving circuit diagram showing a pair of Thyristors (T1 and T2) and a pair of IGBTs (I1 and I2) redrawn from the ATyS specification (requirements: Drive R1 and Drive R2)}
+\label{motor_control_circuit}
+\end{figure}
+
+%Design considerations for motor drives include providing stable speed control and preventing large currents\cite{Bodur}.
+
+Indicated in the diagram (Figure \ref{motor_control_circuit}) are the control signals required to perform certain actions on the motor. This includes the direction of rotation which is achieved by stimulating opposite Thyristor and IGBT combinations. Additionally, the brake functionality is shown which involves driving both of the IGBTs. The PWM from the regulation scheme is provided to the correct IGBT by the Motor Driving module. The code which provides the necessary control to the IGBTs is shown in Appendix Item \ref{igbt-driving-code}.
+
+\subsection{Clock Design}
+
+As defined in the micro-processor specification, the requirement for the PWM produced is a 1kHz PWM signal with a resolution of 100. This means that the PWM can be controlled to an accuracy of 1\%. From this, it can be determined that the PWM must be driven with a clock of at least 100kHz. The ADC requires a higher clock frequency in order to perform oversampling. The speed of the ADC determines the accuracy of the measurement used in current regulation. Therefore, the faster the result of the ADC is produced, the better. Due to the ADC implementation, this metric translates directly to the clock frequency. 
+
+The internal oscillator on the MachXO2 was used to generate the higher clock for the ADC. The maximum value of the clock, 133 MHz, was used in order to maximise the data-rate of the current measurements. This clock signal was divided down to 200kHz using the phase-locked loop in order to drive the rest of the system. This is sufficient to allow for the regulation process to update the PWM before the next cycle. It also allows for the PWM signal to have double the resolution than is specified.
+
+\subsection{Diagnostics}
+\label{diagnostic-section}
+System diagnostics are highly recommended by the IEC 61508 SIL standards as a measure to reduce the effect of errors\cite{IEC61508}. They help to improve the functional safety of a device by detecting, and possibly correcting, dangerous conditions\cite{Jeppesen}. Where good design practices can prevent systematic errors in the system, diagnostics help to prevent and reduce the effect of random hardware faults. The implementation of diagnostics for this system is beyond the scope of this project. A number of applicable diagnostics are discussed in the remainder of this section.
+
+
+A number of diagnostics are discussed by Jeppesen, Rajamani and Smith\cite{Jeppesen}. Diagnostics which have been applied to the FPGA solutions include a PWM checker, watchdog timer, ADC out-of-range detection and module self-tests by error injection\cite{Jeppesen}.
+Each of these diagnostic measures could be applied to the ATyS processor developed in this project to enhance the functional safety of the solution.
+
+Additionally, full redundancy architectures can be utilised in order to verify system behaviour\cite{Jeppesen, BorcsokDesign}. The use of a redundancy architecture, which is possible in FPGAs\cite{HayekSRAM}, is recommended by the standards\cite{IEC61508, Borcsok} as it increases the reliability of the system\cite{HayekSafety}. Duplex redundancy is a common methodology which requires the system to be synthesised twice and the outputs are compared\cite{HayekSRAM}. An example duplex redundancy architecture, 1oo2 (one out of two), is shown in Figure \ref{onchip_redundancy}. The system must be synthesised twice in order to compare the results and ensure that the results are consistent as shown in the diagram.
+
+
+
+\begin{figure}
+    \centering
+    \input{Diagrams/Redundancy.tex}
+    \caption{FPGA (1oo2) on-chip redundancy architecture (based on diagram in \cite{Borcsok})}
+    \label{onchip_redundancy}
+\end{figure}
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.89\textwidth]{images/SystemRedundan%cyInFPGAs.pdf}
+%\caption{FPGA On-chip Redundancy 1oo2 Architecture\cite{Borcsok}}
+%\label{onchip_redundancy}
+%\end{figure}
+
+%Artihmetic operations should be avoided in favour of logical operations to allow for efficient synthesis\cite{deCastro}. Transitioning algorithms and functionality requires a redesign in order to realise the benefits of an FPGA implementation\cite{deCastro}.
+
+\section{Physical Prototype}
+As part of the development of this project, a physical prototype was created. The prototype consists of a modified version of the PCB used in the microcontroller solution. In this section, the adoption of tools and components used in the implementation of the prototype are discussed. The PCB changes, made by the Socomec design team, in order to incorporate an FPGA into the existing commercial ATyS PCB are also discussed in this section. The results of the synthesis process for the design are presented. Additionally, the implemented behaviour of the prototype is presented.
+
+\subsection{FPGA and Tool Adoption}
+
+A number of factors need to be considered in the selection of an embedded controller. These include cost, size, performance, availability and verification capability\cite{Gomes}. The FPGA which has been adopted for the project is the Lattice Mach XO2-2000. This FPGA has 2112 LUT4 logic units. The larger package was chosen to provide as much flexibility as possible for the prototype. The MachXO2 FPGA has in-built diagnostics including configuration checks. The safety compatible version of Lattice Diamond (Lattice Diamond 2.0) was used for the development in this project. The safety standards require proven-in-use tools to be used in the development of safety-critical systems. This version of Diamond has been marked as proven-in-use by Lattice.
+
+
+\subsection{PCB Re-design}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.89\textwidth]{images/PrototypeBoard.pdf}
+\caption{The prototype motor control PCB with an FPGA processor}
+\label{board}
+\end{figure}
+
+The PCB was re-designed to allow for the prototyping of an FPGA solution. This PCB can be seen in Figure \ref{board}. This task was performed by design engineers at Socomec. The movement to an FPGA solution required minimal changes to the existing design. The most considerable change was the switch of the FPGA in the place of the microcontroller. Since most of the FPGA pins are freely configurable, the change from a microcontroller to an FPGA is flexible in terms of routing\cite{SalewskiSystematic}. The nature of the design implementation allowed the ADC to be implemented using a simple RC network. External memory units could be removed as the FPGA has internal memory units. A JTAG programming interface was added to the design to allow the FPGA to be reprogrammed.
+
+\subsection{Prototyping Strategy}
+\label{prototyping-strategy}
+An incremental prototyping strategy was used in order to test each of the design modules independently. This involved mapping inputs to the series of push-buttons used for position acquisition and mapping the outputs to general I/O ports. This allowed the inputs of modules to be simulated and the outputs to be analysed on an oscilloscope. This provided insight into the physical behaviour of each module and allowed the design to be implemented incrementally. This process was performed after the module verification, discussed in  Section \ref{verification}. This meant that each of the individual modules had already been verified which resulted in a rapid implementation process with each of the modules working as expected. 
+
+Despite the fact that each of the modules had been functionally verified, there were a number of problems relating to the specification which were identified while prototyping the design. For example, the naming convention was inconsistent between the schematic for the microcontroller solution and the FPGA board. This resulted in the positions being read in reverse. For example, position 1 was read as position 2. However, direction calculation and the position translation was updated and the expected behaviour was realised.
+
+Components which were not utilised by the prototype were used as debugging interfaces. The interface used to communicate with the second control board was used to view the values produced by the ADC. This allowed the RC components to be tuned to the optimum range for the measurement voltage. It also allowed for debugging when testing the regulation control process as the values could be stepped through on the oscilloscope and the response could be analysed.
+
+\subsection{Synthesis Results}
+
+Mach XO2 FPGAs come in different package sizes for which the number of logic units and the number of pins varies as well as the cost. The synthesised prototype design used 36\% of the capacity of the Mach XO2-2000 FPGA used in the project. This leaves 1352 of the 2112 logic units in the FPGA available for use. This additional space could be used for the diagnostic components and redundancy architectures discussed in Section \ref{diagnostic-section}. Alternatively, the package size could be reduced. The design used 20 of the
+100 FPGA I/O ports. This was composed of eight for the position measurement, three for the command input, three for each of the ADC measurements and six for the motor control signals.
+
+\subsection{Prototype Behaviour}
+The prototype successfully implemented the safety function of the device. Physical prototyping allowed for the behaviour of the designed system to be verified and compared against the existing solution. Functionality of the physical prototype includes performing the core safety function of the device, performing a transfer from one power source to another. This behaviour requires the correct acquisition of commands and position and calculation  of the required movement as well as the translation of this into a control sequence to drive the motor. Additional functionality includes the regulation of the current in order to control the response in cases of stalled or blocked motors. The timeout and movement retry behaviour in the microcontroller solution was also replicated in the design and prototype.
+
+\section{Design Conclusion}
+
+The FPGA-based system was designed based on the original microcontroller-based system specification. The motor control behaviour was identified as the safety function of the device. The requirements that allow this to be performed were derived from this specification and became the requirements for the design of the FPGA system. Following the V-model process, a system architecture was derived from these requirements. Four main system processes were identified in order to meet the requirements and were integrated as modules to form the system architecture. These modules are Input Processing, ADC, PWM Regulation and Motor Driving. The design and implementation of these modules has been described in this section. Additionally, the clock design was discussed. The planning of diagnostics was also presented; however, the implementation of these diagnostics was outside the scope of the project. Finally, the physical prototype which was created as part of the development in this project was presented in this section. The prototype successfully replicated the safety function behaviour of the microcontroller board in the ATyS.
