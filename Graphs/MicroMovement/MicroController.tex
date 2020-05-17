@@ -1,0 +1,38 @@
+\begin{subfigure}{0.8\textwidth}
+\centering
+\begin{tikzpicture}
+%\pgfplotsset{scale only axis, scaled x ticks=base 10:3, xmin=0, xmax=0.06}
+
+% current
+\begin{axis}[
+    %legend pos=south west,
+  legend style={at={(0.5,0.03)},anchor=south},
+  axis y line*=right,
+  axis x line=none,
+  ymin=-2, ymax=2,
+  ylabel=Motor Current (A)
+]
+
+\addlegendimage{/pgfplots/refstyle=Duty_Cycle}\addlegendentry{Duty-cycle}
+\addplot[red!60]table {Graphs/MicroMovement/MotorCurrent.txt};
+\addlegendentry{Motor Current}
+\label{Motor_Current}
+\end{axis}
+
+% pwm
+\begin{axis}[
+axis y line*=left,
+ymin=-10, ymax=110,
+xlabel=Time (s),
+ylabel=PWM Duty-cycle (\%),
+]
+\addplot[blue!80]table {Graphs/MicroMovement/DutyCycle.txt};
+\label{Duty_Cycle}
+\end{axis}
+
+
+\end{tikzpicture}
+
+\subcaption{Micro-controller Motor Control}
+\label{MICROgraph}
+\end{subfigure}

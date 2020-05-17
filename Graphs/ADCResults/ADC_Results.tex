@@ -1,0 +1,30 @@
+\begin{tikzpicture}
+%\pgfplotsset{scale only axis, scaled x ticks=base 10:3, xmin=0, xmax=0.06}
+
+% current
+\begin{axis}[
+    %legend pos=south west,
+  legend style={at={(0.97,0.03)},anchor=south east},
+  %axis y line*=left,
+  %axis x line=none,
+  ymin=0, ymax=2,
+  xlabel=Time (s),
+  ylabel=Voltage (V)
+]
+
+
+\addlegendimage{/pgfplots/refstyle=adc_results_graph_vin}
+\addlegendentry{${V_{in}}$}
+\addlegendimage{/pgfplots/refstyle=adc_results_graph_adc}
+\addlegendentry{${V_{out}}\ ADC$}
+\addplot[red!60]table {Graphs/ADCResults/ADC_Vin.txt};
+\label{adc_results_graph_vin}
+\addplot[blue!80]table {Graphs/ADCResults/ADC_Vadc.txt};
+\label{adc_results_graph_adc}
+\end{axis}
+
+
+
+\end{tikzpicture}
+
+\label{FPGAgraph}

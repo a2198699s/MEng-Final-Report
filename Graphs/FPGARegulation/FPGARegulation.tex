@@ -1,0 +1,37 @@
+\begin{subfigure}{0.8\textwidth}
+\centering
+\begin{tikzpicture}
+%\pgfplotsset{scale only axis, scaled x ticks=base 10:3, xmin=0, xmax=0.06}
+
+% current
+\begin{axis}[
+    %legend pos=south west,
+  legend style={at={(0.97,0.97)},anchor=north east},
+  axis y line*=right,
+  axis x line=none,
+  ymin=0, ymax=4,
+  ylabel=Motor Current (A)
+]
+
+\addlegendimage{/pgfplots/refstyle=Duty_Cycle}\addlegendentry{Duty-cycle}
+\addplot[red!60]table {Graphs/FPGARegulation/FPGARegulationCurrent.txt};
+\addlegendentry{Motor Current}
+\label{Motor_Current}
+\end{axis}
+
+% pwm
+\begin{axis}[
+axis y line*=left,
+ymin=-10, ymax=110,
+xlabel=Time (s),
+ylabel=PWM Duty-cycle (\%),
+]
+\addplot[blue!80]table {Graphs/FPGARegulation/FPGARegulationDC.txt};
+\label{Duty_Cycle}
+\end{axis}
+
+\end{tikzpicture}
+
+\subcaption{FPGA Current Regulation}
+\label{FPGAreggraph}
+\end{subfigure}

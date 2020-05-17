@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+%\begin{tabular}{ |p{4cm}||p{4.5cm}|p{4.5cm}|  }
+\begin{tabular}{ |p{0.2\textwidth}|p{0.35\textwidth}|p{0.35\textwidth}| }
+ \hline
+ \multicolumn{3}{|c|}{FPGA vs Microcontroller Real-time Safety Comparison} \\
+ \hline
+ Property & FPGA & Microcontroller \\
+ \hline
+ \hline
+ Timing Behaviour & Deterministic timings: synthesised electronics with predictable timing behaviour that can be accurately simulated\cite{SalewskiExploring, jabeen, Dubey, tahoori, al-mahmood}  & Non-deterministic timings: Adoption of caching mechanisms and interrupts results in unpredictable timings\cite{SalewskiExploring, wells}   \\
+ \hline
+ Input Acquisition Model & Continuous monitoring: inputs are continuously monitored allowing the system to respond to events in realtime\cite{SalewskiExploring} & Time-slicing: inputs are monitored on a polling or interrupt-based system which introduces latency\cite{SalewskiExploring} \\
+
+ \hline
+ Operating Mode & Real parallelism: multiple calculation streams can be performed concurrently\cite{SalewskiExploring, Gomes, MonmassonDesign, NaouarSliding, SalewskiSystematic, Zhang, Al-Dhaher} & Simulation of parallel: sequential single-core processors can only handle one task at a time\cite{SalewskiExploring, Al-Dhaher}\\
+ \hline
+ Processing Speed & Quasi-analogue: adoption of optimised architectures reduces response times to quasi-analogue levels\cite{MonmassonFPGADesignMethodology, Idkhajine, Zhang} & Fast: micro-controllers can sometimes struggle in high demand environments or with complex calculations\cite{Zhang} \\
+ \hline
+ Application of Diagnostics & Parallel diagnostics: can run in parallel with the system operation without affecting performance\cite{Jeppesen} & Interrupt-based: diagnostics require processing to be taken away from the main system or be performed off-chip\cite{SalewskiExploring, Al-Dhaher} \\
+ \hline
+ Design Language &  Technology independent: HDL designs are independent of the hardware and so a different FPGA device can be used with minimal effort\cite{SalewskiExploring, SalewskiSystematic, Dubey, Zhang, deCastro, Acero} & Technology dependant: microcontroller firmware is often hardware-dependent making it more prone to obsolescence\cite{SalewskiExploring, SalewskiSystematic}   \\
+ \hline
+\end{tabular}
+
+\caption{Comparison between FPGAs and micro-controllers for use in real-time safety-critical systems}
+\label{safety-table}
+\end {table}

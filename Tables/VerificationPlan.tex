@@ -1,0 +1,40 @@
+\begin{table}[tH]
+\centering
+\begin{tabular}{ |p{0.15\textwidth}|p{0.4\textwidth}|p{0.4\textwidth}| }
+ \hline
+ \multicolumn{3}{|c|}{ATyS Motor Control Verification Table} \\
+ \hline
+ Requirement & Description & Verification Results \\
+ \hline
+ \hline
+
+ Input R1 & Provide all possible input combinations and compare the results with a look-up-table & A sweep through all command inputs was done and the translation was verified against the original specification \\
+ \hline 
+ Input R2 & Provide all possible input combinations and compare the results with a look-up-table & Each position was input and the translation was verified against the specification (see Figure \ref{position_sim})  \\
+ \hline 
+ Input R3 & Check all 27 combinations of position and command and verify the correct movement is taken & Each combination produced the correct direction and control signals \\
+ \hline 
+ Input R4 & Run through each of the possible control stages and ensure the correct timings and values of processes & Timings and control signals match the specification \\
+ \hline
+ PWM R1 & Check the duty-cycle output for a motor movement over each of the defined stages & The duty-cycle value produced in each of the stages was verified against the specification \\
+ \hline
+ PWM R2 & Model a stalled motor in simulation (motor resistance measured to be \si{47}{\ohm}) and ensure regulation around the correct current value & The simulation model allowed the regulation process to be fine-tuned and it settled on an accurate value (see Figure \ref{regulation_sim}) \\
+ \hline 
+ PWM R3 & Check the frequency and duty-cycle of the output against the specified input duty-cycle value & A range of different duty-cycles were provided to the generator and the output was verified to match exactly \\
+ \hline 
+ PWM R4 & Verify that the current flag is raised half-way through the generation process & A range of different duty-cycles were input and each produced a flag exactly in the middle of the on-time \\
+ \hline
+ PWM R5 & Input the range of valid voltages (150V - 333V) and verify that the output matches the formula & A sweep of the input values obtained a response which matched the specification \\
+ \hline
+ ADC R1 & Model the RC input and supply an analogue value and verify the digital output & ADC accurately simulated for a sawtooth input (see Figure \ref{adc_sim}) \\
+ \hline
+ ADC R2 & Model the RC input and supply an analogue value and verify the digital output & ADC accurately simulated for a sawtooth input (see Figure \ref{adc_sim})\\
+ \hline
+ Drive R1 & Verify that the correct IGBT is driven for each direction (see Figure \ref{motor_control_circuit} which shows the required IGBT signals for each movement) & The motor control process was simulated and the IGBT stimulus was verified against the expected signals (see Figure \ref{igbt_sim})\\
+  \hline
+ Drive R2 & Verify that the correct Thyristor is driven for each direction (Figure \ref{motor_control_circuit} shows the required Thyristor signals for each movement) & The motor control process was simulated and the Thyristor stimulus was verified against the expected signals \\
+ \hline
+\end{tabular}
+\caption{Verification table for the ATyS motor control requirements}
+\label{requirements-verification-table}
+\end {table}

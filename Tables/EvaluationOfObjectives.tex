@@ -1,0 +1,27 @@
+\begin{table}[tH]
+\centering
+\begin{tabular}{ |p{0.3\textwidth}|p{0.3\textwidth}|p{0.3\textwidth}| }
+ \hline
+ \multicolumn{3}{|c|}{Evaluation of Project Objectives} \\
+ \hline
+ Objective & Evaluation & Further Work \\
+ \hline
+ \hline
+
+ Conduct a literature review & The application of safety-standards to FPGA systems and the application of FPGAs to safety-related and industrial switching equipment were investigated & Investigate alternative technologies which could be used as a solution (for example ASICs) and how an FPGA solution could benefit other products \\
+ \hline 
+ Analyse the safety standards & The project applied the relevant safety standards and recommended processes  for FPGAs (as demonstrated in Sections \ref{design} and \ref{verification}) & Anticipated changes to the safety standards for the inclusion of FPGA specific considerations should be adopted by the project \\
+ \hline 
+ Design an FPGA-based alternative solution & The existing specification was used to derive the requirements for the FPGA solution and the V-model process was followed closely to create the design & The entire specification, rather than the safety-related subset, could be designed for including the additional device interfaces and inputs \\
+ \hline
+ Develop VHDL code to implement the design & The modules that were designed were implemented using 21 entities (2967 lines of design code) which synthesised as 35 units & Diagnostics, planned as part of this project, could be implemented to further enhance the functional safety of the device \\
+ \hline
+ Verify the design & Each of the individual modules were tested directly against the project requirements (4034 lines of verification code) & Gate-level and system-level simulations would provide insight into accurate timing and module interactions \\
+ \hline
+ Physically prototype the FPGA-based solution & The safety-function behaviour of the FPGA solution was compared to the micro-controller solution and accurately replicated the outputs & The additional, non-safety-related behaviour could be replicated to produce a functionally identical solution (the design only used 36\% of the FPGA logic) \\
+ \hline 
+\end{tabular}
+
+\caption{Evaluation of project objectives and suggestions for further work}
+\label{evaluation-table}
+\end {table}
